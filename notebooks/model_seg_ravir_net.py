@@ -50,26 +50,67 @@ class segRAVIR(nn.Module):
         for i in range(0,4):
             self.sky_blue.append(nn.Conv2d(features[i],features[i+1],kernel_size=2,stride=2))
         
-        
+        #down
         for feature in features:
             self.downs.append(ResBlock(feature, feature))
 
-        self.final_conv = nn.Conv2d(features[0], out_channels, kernel_size=1)
+        #ups_1
+        rev_features = features[:5][::-1]
+        for i in range(0,4):
+            self.ups_1.append(nn.ConvTranspose2d(rev_features[i], rev_features[i+1], kernel_size=2, stride=2))
+            self.ups_1.append(ResBlock(rev_features[i+1], rev_features[i+1]))
+        
+        #ups_2
+        for i in range(0,4):
+            self.ups_2.append(nn.ConvTranspose2d(rev_features[i], rev_features[i+1], kernel_size=2, stride=2))
+            self.ups_2.append(ResBlock(rev_features[i+1], rev_features[i+1]))
+
+
+        self.final_conv_1 = nn.Conv2d(features[0], out_channels, kernel_size=1)
+        self.final_conv_2 = nn.Conv2d(features[0], in_channels, kernel_size=1)
+
+
     def forward(self,x):
         skip_connections = []
 
-        x = self.green[0](x)
-        
 
+        #encode
+        x = self.green[0](x)
         for i in range(0,4):
             x = self.downs[i](x)
             skip_connections.append(x)
             x = self.sky_blue[i](x)
+
         x = self.downs[4](x)
         x = self.downs[5](x)
         x = self.downs[6](x)
-        skip_connections.append(x)
+        vae_input = x
+
+        skip_connections = skip_connections[::-1]
+        #decode_1
+        for i in range(0,4):
+            x = skip_connections[i] + self.ups_1[i](x)
         
+        x = self.green[1](x)
+        x = self.green[2](x)
+        x = self.final_conv_1(x)
+        
+        #decode_2
+        for i in range(0,4):
+            vae_input = skip_connections[i] + self.ups_2[i](vae_input)
+
+        vae_out = self.final_conv_2(vae_input)
+
+        return x, vae_out
+
+        
+
+
+
+        
+
+
+
 
 
 
