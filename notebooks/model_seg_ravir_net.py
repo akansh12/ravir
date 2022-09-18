@@ -9,13 +9,13 @@ class ResBlock(nn.Module):
         self.conv = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, 3, 1, 1, bias=False),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True),
-            nn.Dropout(inplace=True), ###check_again for dropout and bias
+            nn.ReLU(inplace=False),
+            nn.Dropout(inplace=False), ###check_again for dropout and bias
 
             nn.Conv2d(out_channels, out_channels, 3, 1, 1, bias=False),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True),
-            nn.Dropout(inplace=True) ### Check_again
+            nn.ReLU(inplace=False),
+            nn.Dropout(inplace=False) ### Check_again
         )
     def forward(self,x):
         return x+self.conv(x)
@@ -26,7 +26,7 @@ class GreenBlock(nn.Module):
         self.conv = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, 3, 1, 1, bias=False),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True)
+            nn.ReLU(inplace=False)
         )
     def forward(self,x):
         return self.conv(x)
@@ -78,7 +78,7 @@ class segRAVIR(nn.Module):
             )
         self.final_conv_2 = nn.Sequential(
             nn.Conv2d(features[0], in_channels, kernel_size=1),
-            nn.ReLU(inplace=True)
+            nn.ReLU()
             )
 
 
