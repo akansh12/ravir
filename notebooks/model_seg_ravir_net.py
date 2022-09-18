@@ -56,7 +56,7 @@ class segRAVIR(nn.Module):
 
         #ups_1
         rev_features = features[:5][::-1]
-        for i in range(0,4):
+        for i in range(0,4): ### Make it sequential
             self.ups_1.append(nn.ConvTranspose2d(rev_features[i], rev_features[i+1], kernel_size=2, stride=2))
             self.ups_1.append(ResBlock(rev_features[i+1], rev_features[i+1]))
         
@@ -89,6 +89,8 @@ class segRAVIR(nn.Module):
         skip_connections = skip_connections[::-1]
         #decode_1
         for i in range(0,4):
+            print(skip_connections[i].shape)
+            print(self.ups_1[i])
             x = skip_connections[i] + self.ups_1[i](x)
         
         x = self.green[1](x)
