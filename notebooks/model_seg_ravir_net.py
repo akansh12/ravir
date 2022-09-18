@@ -57,17 +57,29 @@ class segRAVIR(nn.Module):
         #ups_1
         rev_features = features[:5][::-1]
         for i in range(0,4): ### Make it sequential
-            self.ups_1.append(nn.ConvTranspose2d(rev_features[i], rev_features[i+1], kernel_size=2, stride=2))
-            self.ups_1.append(ResBlock(rev_features[i+1], rev_features[i+1]))
+            self.ups_1.append(nn.Sequential(
+                nn.ConvTranspose2d(rev_features[i], rev_features[i+1], kernel_size=2, stride=2),
+                ResBlock(rev_features[i+1], rev_features[i+1])
+                )
+                )
         
         #ups_2
         for i in range(0,4):
-            self.ups_2.append(nn.ConvTranspose2d(rev_features[i], rev_features[i+1], kernel_size=2, stride=2))
-            self.ups_2.append(ResBlock(rev_features[i+1], rev_features[i+1]))
+            self.ups_2.append(nn.Sequential(
+                nn.ConvTranspose2d(rev_features[i], rev_features[i+1], kernel_size=2, stride=2),
+                ResBlock(rev_features[i+1], rev_features[i+1])
+                )
+                )
 
 
-        self.final_conv_1 = nn.Conv2d(features[0], out_channels, kernel_size=1)
-        self.final_conv_2 = nn.Conv2d(features[0], in_channels, kernel_size=1)
+        self.final_conv_1 = nn.Sequential(
+            nn.Conv2d(features[0], out_channels, kernel_size=1),
+            nn.Softmax2d()
+            )
+        self.final_conv_2 = nn.Sequential(
+            nn.Conv2d(features[0], in_channels, kernel_size=1),
+            nn.ReLU(inplace=True)
+            )
 
 
     def forward(self,x):
@@ -89,8 +101,6 @@ class segRAVIR(nn.Module):
         skip_connections = skip_connections[::-1]
         #decode_1
         for i in range(0,4):
-            print(skip_connections[i].shape)
-            print(self.ups_1[i])
             x = skip_connections[i] + self.ups_1[i](x)
         
         x = self.green[1](x)
