@@ -10,12 +10,12 @@ class ResBlock(nn.Module):
             nn.Conv2d(in_channels, out_channels, 3, 1, 1, bias=False),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=False),
-            nn.Dropout(inplace=False), ###check_again for dropout and bias
+            nn.Dropout(p= 0.2, inplace=False), ###check_again for dropout and bias
 
             nn.Conv2d(out_channels, out_channels, 3, 1, 1, bias=False),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=False),
-            nn.Dropout(inplace=False) ### Check_again
+            nn.Dropout(p= 0.2, inplace=False) ### Check_again
         )
     def forward(self,x):
         return x+self.conv(x)
